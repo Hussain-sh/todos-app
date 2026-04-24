@@ -12,6 +12,10 @@ app.use(cors({
     credentials: true
 }))
 
+const taskRoutes = require("./routes/taskRoutes");
+
+app.use('/api', taskRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
