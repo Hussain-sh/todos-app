@@ -27,7 +27,7 @@ export default function TodoList() {
   }, [todos, showAll]);
 
   const tabClass = (tab: string) =>
-    `sm:px-6 py-3 w-1/2 sm:w-auto justify-center sm:justify-start border-b-2 title-font font-medium inline-flex items-center leading-none tracking-wider rounded-t cursor-pointer ${
+    `w-1/4 text-sm px-4 sm:px-6 py-3 sm:w-1/2 sm:text-base sm:w-auto justify-center sm:justify-start border-b-2 title-font font-medium inline-flex items-center leading-none tracking-wider rounded-t cursor-pointer ${
       activeTab === tab
         ? "border-primary bg-white text-primary"
         : "border-gray-200 bg-transparent text-white"
