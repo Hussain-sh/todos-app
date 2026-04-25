@@ -3,13 +3,17 @@ const taskService = require('../services/taskService')
 const addTask = async (req, res) => {
     try{
         const { title, description } = req.body;
-        if(!title || !description){
+        if(!title){
             res.status(400).json({ message: "Missing requirred fields!" });
+        }
+
+        if (description.length > 500) {
+            return res.status(400).json({ message: "Description must be under 500 characters." });
         }
         const newTask = await taskService.create({ title, description });
         res.status(201).json({ message: 'Task created successfully!', newTask });
     } catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Something went wrong. Please try again later.' });
     }
 }
 
@@ -19,17 +23,20 @@ const getTasks = async(req, res)=> {
        const getTasks = await taskService.getAll(completed);
        res.status(200).json(getTasks);
     } catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Failed to fetch tasks.' });
     }
 }
 
 const getTaskById = async(req, res) => {
     try{
         const { id } = req.params;
-        const getTask = await taskService.getTask(id);
-        res.status(200).json(getTask);
-    }catch(error){
-        res.status(404).json({ error: error.message });
+        const task = await taskService.getTask(id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found.' });
+        }
+        res.status(200).json(task);
+    } catch(error){
+        res.status(500).json({ message: 'Something went wrong. Please try again later.' });
     }
 }
 
@@ -43,17 +50,20 @@ const updateTask = async(req, res) => {
         const updateTask = await taskService.updateTask(id, taskData);
         res.status(200).json({ message: 'Task Updated successfully', updateTask });
     }catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Something went wrong. Please try again later.' });
     }
 }
 
 const deleteTask = async(req, res) => {
     try{
         const { id } = req.params;
-        await taskService.deleteTask(id);
+        const task = await taskService.deleteTask(id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found.' });
+        }
         res.status(200).json({ message: 'Task Deleted successfully' });
     }catch(error){
-        res.status(404).json({ error: error.message });
+        res.status(500).json({ message: 'Failed to delete tasks.' });
     }
 }
 
@@ -63,9 +73,13 @@ const softDelete = async(req, res) => {
         const { id } = req.params;
         const { isDeleted } = req.body;
         const result = await taskService.softDelete(id, isDeleted);
+        if(!result){
+            return res.status(404).json({ message: 'Task not found.' });
+        }
+
         res.status(200).json({ message: 'Task Deleted', result });
     }catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Failed to delete tasks.' });
     }
 }
 
@@ -76,7 +90,7 @@ const completeTask = async(req, res) => {
         const result = await taskService.completeTask(id, completed);
         res.status(200).json({ message: "Marked as completed", result });
     }catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Something went wrong. Please try again later.' });
     }
 }
 
