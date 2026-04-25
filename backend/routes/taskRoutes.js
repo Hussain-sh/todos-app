@@ -10,6 +10,6 @@ router.get('/tasks/:id', getTaskById);
 router.put('/tasks/:id', updateTask);
 router.delete('/tasks/:id', deleteTask);
 router.patch('/tasks/:id', softDelete);
-router.patch('/tasks', completeTask);
+router.patch('/tasks/:id/complete', completeTask);
 
 module.exports = router;

@@ -7,7 +7,7 @@ const addTask = async (req, res) => {
             res.status(400).json({ message: "Missing requirred fields!" });
         }
         const newTask = await taskService.create({ title, description });
-        res.status(201).json(newTask);
+        res.status(201).json({ message: 'Task created successfully!', newTask });
     } catch(error){
         res.status(500).json({ error: error.message });
     }
@@ -41,7 +41,7 @@ const updateTask = async(req, res) => {
             return res.status(400).json({ error: 'No fields provided to update' });
         }
         const updateTask = await taskService.updateTask(id, taskData);
-        res.status(200).json(updateTask);
+        res.status(200).json({ message: 'Task Updated successfully', updateTask });
     }catch(error){
         res.status(500).json({ error: error.message });
     }
@@ -71,7 +71,8 @@ const softDelete = async(req, res) => {
 
 const completeTask = async(req, res) => {
     try{
-        const { completed, id } = req.query;
+        const { completed } = req.query;
+        const { id } = req.params;
         const result = await taskService.completeTask(id, completed);
         res.status(200).json({ message: "Marked as completed", result });
     }catch(error){
