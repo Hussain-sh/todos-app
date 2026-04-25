@@ -8,9 +8,9 @@ const PORT = process.env.PORT;
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://localhost:3000',
-    credentials: true
-}))
+  origin: process.env.CLIENT_URL,
+  credentials: true
+}));
 
 const taskRoutes = require("./routes/taskRoutes");
 
