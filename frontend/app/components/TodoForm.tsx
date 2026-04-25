@@ -6,9 +6,10 @@ import { FaCheck } from "react-icons/fa";
 import * as Yup from "yup";
 import { getTodo } from "../lib/api";
 import { base_url } from "../lib/constants";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Spinner from "./Spinner";
+import { useEffect } from "react";
 
 interface TodoFormProps {
   view: boolean;
@@ -28,6 +29,8 @@ export default function TodoForm({ view, id }: TodoFormProps) {
   const {
     data: todo,
     isLoading,
+    isError,
+    error,
     refetch: refetchTodo,
   } = useQuery({
     queryKey: ["todo", id],
@@ -46,11 +49,16 @@ export default function TodoForm({ view, id }: TodoFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTodo),
       });
-      return response.json();
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       toast.success(data.message);
+      router.push("/");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -63,11 +71,18 @@ export default function TodoForm({ view, id }: TodoFormProps) {
         `${base_url}/tasks/${id}/complete?completed=${completed}`,
         { method: "PATCH" },
       );
-      return response.json();
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      return data;
     },
     onSuccess: () => {
       refetchTodo();
       queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -79,12 +94,19 @@ export default function TodoForm({ view, id }: TodoFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTodo),
       });
-      return response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       formik.resetForm();
       toast.success(data.message);
+      router.push("/");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -98,12 +120,19 @@ export default function TodoForm({ view, id }: TodoFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isDeleted: true }),
       });
-      return response.json();
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       toast.success("Task deleted successfully!");
       router.push("/");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -125,11 +154,17 @@ export default function TodoForm({ view, id }: TodoFormProps) {
     },
   });
 
-  if (view && isLoading) return <div>Loading...</div>;
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.message || "Failed to fetch task.");
+    }
+  }, [isError, error]);
+
+  if (view && isLoading) return <Spinner />;
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="w-full mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center sm:w-4/5"
+      className="w-4/5 mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center"
     >
       {view && (
         <div className="flex flex-col gap-4 items-center justify-center">
@@ -138,11 +173,25 @@ export default function TodoForm({ view, id }: TodoFormProps) {
             type="button"
             disabled={completeTodoMutation.isPending}
             onClick={() => completeTodoMutation.mutate(!todo?.completed)}
-            className={`w-20 h-20 rounded-full flex justify-center items-center cursor-pointer disabled:opacity-50 ${
+            className={`w-14 h-14 rounded-full flex justify-center items-center cursor-pointer disabled:opacity-50 ${
               todo?.completed ? "bg-green-700" : "bg-white"
-            }`}
+            } sm:w-20 sm:h-20`}
           >
-            <FaCheck size={40} color={todo?.completed ? "#fff" : "#000"} />
+            <FaCheck
+              size={20}
+              className="sm:hidden"
+              color={todo?.completed ? "#fff" : "#000"}
+            />
+            <FaCheck
+              size={30}
+              className="hidden sm:block md:hidden"
+              color={todo?.completed ? "#fff" : "#000"}
+            />
+            <FaCheck
+              size={40}
+              className="hidden md:block"
+              color={todo?.completed ? "#fff" : "#000"}
+            />
           </button>
         </div>
       )}
@@ -220,7 +269,6 @@ export default function TodoForm({ view, id }: TodoFormProps) {
           >
             Back To Todos
           </Link>
-          {/* <button type="submit" className="px-4 py-2 text-white bg-primary">Add Task</button> */}
         </div>
       </div>
     </form>

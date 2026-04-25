@@ -11,9 +11,9 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         <AiOutlineCheckCircle size={24} />
       </div>
 
-      <div className="flex flex-col flex-1">
-        <h3 className="font-semibold text-gray-800">{todo.title}</h3>
-        <p className="text-sm text-gray-500">{todo.description}</p>
+      <div className="flex flex-col flex-1 min-w-0">
+        <h3 className="font-semibold text-gray-800 truncate">{todo.title}</h3>
+        <p className="text-sm text-gray-500 truncate">{todo.description}</p>
       </div>
 
       <Link

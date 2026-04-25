@@ -1,13 +1,20 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTodos, Todo } from "../lib/api";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TodoGrid from "./TodoGrid";
 import TodoItem from "./TodoItem";
+import Spinner from "./Spinner";
+import toast from "react-hot-toast";
 
 export default function TodoList() {
   const [showAll, setShowAll] = useState<boolean>(false);
-  const { data: todos, isLoading } = useQuery({
+  const {
+    data: todos,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["todos"],
     queryFn: fetchTodos,
   });
@@ -17,8 +24,13 @@ export default function TodoList() {
     return showAll ? todos : todos?.slice(0, 4);
   }, [todos, showAll]);
 
-  if (isLoading)
-    return <div className="flex justify-center items-center">Loading...</div>;
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.message || "Failed to fetch tasks.");
+    }
+  }, [isError, error]);
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="w-full flex flex-col gap-4">
