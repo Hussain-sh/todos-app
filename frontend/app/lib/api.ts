@@ -7,8 +7,11 @@ export type Todo = {
     completed: boolean
 }
 
-export const fetchTodos = async () => {
-    const response = await fetch(`${base_url}/tasks`);
+export const fetchTodos = async (tab: string | undefined) => {
+    const url = tab === undefined
+    ? `${base_url}/tasks`
+    : `${base_url}/tasks?completed=${tab === "completed"}`;
+    const response = await fetch(url);
     if(!response.ok) throw new Error('Failed to fetch todos');
     return response.json();
 }
